@@ -1,0 +1,18 @@
+services:
+  transfer:
+    build: .
+    container_name: transfer
+    restart: unless-stopped
+    # Solo en local: publícalo con un proxy inverso que ponga HTTPS
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    environment:
+      # Si lo dejas vacío, la clave del admin se genera y aparece en `docker compose logs`
+      INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER:-admin}
+      INITIAL_ADMIN_PASS: ${INITIAL_ADMIN_PASS:-}
+      MAX_STORAGE_MB: ${MAX_STORAGE_MB:-10240}
+      RETENTION_DAYS: ${RETENTION_DAYS:-30}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}

@@ -1,0 +1,23 @@
+[Unit]
+Description=Transfer - subida y descarga de ficheros (Spring Boot)
+After=network.target
+
+[Service]
+Type=simple
+User=transfer
+Group=transfer
+WorkingDirectory=/opt/transfer
+# Variables (clave del admin inicial, rutas, cuota...): ver transfer.env.example
+EnvironmentFile=/opt/transfer/transfer.env
+# Escucha solo en local: publícalo detrás de un proxy inverso con HTTPS
+ExecStart=/usr/bin/java -Xmx256m -jar /opt/transfer/transfer.jar --server.address=127.0.0.1
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=10
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=transfer
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer - Gestión de Ficheros</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <a th:href="@{/}" class="brand">
+            <span class="brand-icon">⚡</span>
+            <span>Transfer</span>
+        </a>
+        <div class="user-nav">
+            <div class="user-badge">
+                <span>👤</span>
+                <span sec:authentication="name">usuario</span>
+                <span sec:authorize="hasRole('ADMIN')" class="role-tag admin">admin</span>
+            </div>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/users}" class="btn-logout" style="border-color: var(--primary); color: var(--primary);">👥 Usuarios</a>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="btn-logout">Cerrar sesión</button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Notificaciones de éxito / error / purga -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span th:text="${successMessage}">Acción completada con éxito.</span>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <span th:text="${errorMessage}">Ha ocurrido un error.</span>
+        </div>
+        <div th:if="${purgeNotice}" class="alert alert-info">
+            <span>ℹ️ <span th:text="${purgeNotice}">Purga automática realizada.</span></span>
+        </div>
+
+        <!-- Contenedor con dos pestañas -->
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button type="button" class="tab-btn" data-tab="descargas"
+                        th:classappend="${activeTab == 'descargas' or activeTab == null} ? 'active' : ''">
+                    <span>📥 Descargas</span>
+                    <span class="counter-badge" th:text="${totalFiles}">0</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="subir"
+                        th:classappend="${activeTab == 'subir'} ? 'active' : ''">
+                    <span>📤 Subir fichero</span>
+                </button>
+            </div>
+
+            <!-- Pestaña 1: Descargas -->
+            <div id="tab-descargas" class="tab-content"
+                 th:classappend="${activeTab == 'descargas' or activeTab == null} ? 'active' : ''">
+
+                <div th:if="${#lists.isEmpty(files)}" class="empty-state">
+                    <div class="empty-state-icon">📂</div>
+                    <h3>No hay ficheros disponibles</h3>
+                    <p>Actualmente no hay ficheros subidos o los existentes han expirado (más de 30 días).</p>
+                    <button type="button" class="btn btn-primary" onclick="document.querySelector('[data-tab=subir]').click()">
+                        Subir el primer fichero
+                    </button>
+                </div>
+
+                <div th:if="${not #lists.isEmpty(files)}">
+                    <div class="toolbar">
+                        <input type="text" id="searchFiles" class="search-input" placeholder="🔍 Buscar por nombre de fichero...">
+                        <div class="files-info-text">
+                            Mostrando <strong id="visibleFilesCount" th:text="${totalFiles}">0</strong> ficheros
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="files-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Fecha de subida</th>
+                                    <th>Peso</th>
+                                    <th style="text-align: right;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="file : ${files}" th:attr="data-filename=${#strings.toLowerCase(file.originalFilename)}">
+                                    <td>
+                                        <div class="file-name-cell">
+                                            <span class="file-icon">📄</span>
+                                            <span th:text="${file.originalFilename}">nombre.ext</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${file.formattedUploadDate}">01/01/2026 12:00</td>
+                                    <td>
+                                        <span class="badge-size" th:text="${file.formattedSize}">1.2 MB</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <!-- Botón 1: Descargar -->
+                                            <a th:href="@{/files/{id}/download(id=${file.id})}"
+                                               class="btn btn-primary" title="Descargar fichero conservándolo en el servidor">
+                                                ⬇️ Descargar
+                                            </a>
+
+                                            <!-- Botón 2: Descargar y borrar -->
+                                            <form th:action="@{/files/{id}/download-and-delete(id=${file.id})}" method="post"
+                                                  class="form-download-delete" style="display: inline;"
+                                                  th:attr="data-filename=${file.originalFilename}">
+                                                <button type="submit" class="btn btn-warning btn-download-delete"
+                                                        title="Descargar y eliminar permanentemente del servidor">
+                                                    ⚡ Descargar y borrar
+                                                </button>
+                                            </form>
+
+                                            <!-- Botón secundario: Borrar -->
+                                            <form th:action="@{/files/{id}/delete(id=${file.id})}" method="post"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('¿Seguro que deseas eliminar este fichero sin descargarlo?');">
+                                                <button type="submit" class="btn btn-danger-outline" title="Eliminar fichero">
+                                                    🗑️
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña 2: Subir fichero -->
+            <div id="tab-subir" class="tab-content"
+                 th:classappend="${activeTab == 'subir'} ? 'active' : ''">
+
+                <div class="upload-card">
+                    <form id="uploadForm" th:action="@{/files/upload}" method="post" enctype="multipart/form-data">
+                        <div class="dropzone" id="dropzone">
+                            <input type="file" name="file" id="fileInput" class="file-input" required>
+                            <div class="dropzone-icon">☁️</div>
+                            <h3>Arrastra y suelta tu fichero aquí</h3>
+                            <p>o haz clic para seleccionar un fichero de tu equipo</p>
+                            <button type="button" class="btn btn-primary" style="pointer-events: none;">Explorar archivos</button>
+                        </div>
+
+                        <div id="selectedFileCard" class="selected-file-card">
+                            <div class="selected-file-details">
+                                <div>
+                                    <strong id="selectedFileName">archivo.zip</strong>
+                                    <div class="files-info-text" id="selectedFileSize">0 KB</div>
+                                </div>
+                                <span style="color: var(--success); font-size: 1.25rem;">✓ Listo</span>
+                            </div>
+                        </div>
+
+                        <div class="upload-actions">
+                            <!-- Barra de progreso a la izquierda del botón de subida -->
+                            <div id="uploadProgressContainer" class="upload-progress-container" style="display: none;">
+                                <div class="progress-info">
+                                    <span id="uploadProgressStatus" class="progress-status">Subiendo...</span>
+                                    <span id="uploadProgressPercent" class="progress-percent">0%</span>
+                                </div>
+                                <div class="progress-bar-track">
+                                    <div id="uploadProgressBar" class="progress-bar-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="uploadSubmitBtn" class="btn btn-primary" disabled>
+                                📤 Subir a Transfer
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="notice-box">
+                        <strong>🛡️ Política de retención automática:</strong><br>
+                        Cualquier fichero que lleve <strong>más de 30 días</strong> almacenado se eliminará automáticamente del disco y de la base de datos al acceder a la web.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        Transfer &bull; Almacenamiento y transferencia segura con SQLite embebida &bull; Alojable en Linux / Windows
+    </footer>
+
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

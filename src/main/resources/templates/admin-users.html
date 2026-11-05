@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Transfer</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <a th:href="@{/}" class="brand">
+            <span class="brand-icon">⚡</span>
+            <span>Transfer</span>
+        </a>
+        <div class="user-nav">
+            <div class="user-badge">
+                <span>👤</span>
+                <span sec:authentication="name">usuario</span>
+                <span class="role-tag admin">admin</span>
+            </div>
+            <a th:href="@{/}" class="btn-logout">← Volver</a>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="btn-logout">Cerrar sesión</button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Alertas -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span th:text="${successMessage}">OK</span>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <span th:text="${errorMessage}">Error</span>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <div class="tab-btn active" style="cursor: default;">
+                    <span>👥 Gestión de Usuarios</span>
+                    <span class="counter-badge" th:text="${#lists.size(users)}">0</span>
+                </div>
+            </div>
+
+            <div class="tab-content active" style="display: block;">
+
+                <!-- Formulario: Crear nuevo usuario -->
+                <div class="admin-card" style="margin-bottom: 2rem;">
+                    <h3 class="admin-section-title">➕ Nuevo usuario</h3>
+                    <form th:action="@{/admin/users/add}" method="post" class="add-user-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="newUsername">Usuario</label>
+                                <input type="text" id="newUsername" name="username" class="form-control" placeholder="nombre" required autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">Contraseña</label>
+                                <input type="password" id="newPassword" name="password" class="form-control" placeholder="contraseña" required autocomplete="new-password">
+                            </div>
+                            <div class="form-group">
+                                <label for="newRole">Rol</label>
+                                <select id="newRole" name="role" class="form-control">
+                                    <option value="ROLE_USER">Usuario</option>
+                                    <option value="ROLE_ADMIN">Admin</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="align-self: flex-end;">
+                                <button type="submit" class="btn btn-primary">Crear usuario</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabla de usuarios -->
+                <div class="table-responsive">
+                    <table class="files-table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                                <th style="text-align: right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td>
+                                    <div class="file-name-cell">
+                                        <span class="file-icon">👤</span>
+                                        <span th:text="${user.username}">nombre</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                                        <select name="role" class="form-control form-control-sm"
+                                                onchange="this.form.submit()">
+                                            <option value="ROLE_USER"  th:selected="${user.role == 'ROLE_USER'}">Usuario</option>
+                                            <option value="ROLE_ADMIN" th:selected="${user.role == 'ROLE_ADMIN'}">Admin</option>
+                                        </select>
+                                    </form>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <!-- Cambiar contraseña -->
+                                        <form th:action="@{/admin/users/{id}/password(id=${user.id})}" method="post"
+                                              style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                                            <input type="password" name="newPassword" class="form-control form-control-sm"
+                                                   placeholder="nueva clave" required style="width: 130px;">
+                                            <button type="submit" class="btn btn-primary btn-sm" title="Guardar nueva contraseña">🔑</button>
+                                        </form>
+
+                                        <!-- Eliminar -->
+                                        <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post"
+                                              style="display: inline;"
+                                              onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
+                                            <button type="submit" class="btn btn-danger-outline btn-sm"
+                                                    title="Eliminar usuario"
+                                                    th:disabled="${user.username == #authentication.name}">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        Transfer &bull; Panel de administración
+    </footer>
+</body>
+</html>
