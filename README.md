@@ -132,6 +132,26 @@ Para servirla en la raíz del dominio, usa `location /` y quita `X-Forwarded-Pre
 
 ---
 
+## Subir ficheros desde Claude (conector MCP)
+
+[`connector/transfer-mcp.mjs`](connector/transfer-mcp.mjs) añade a Claude la herramienta `upload_file`. Necesita Node 20 o superior y no tiene dependencias.
+
+1. Define en el servidor `API_TOKEN` con un valor aleatorio de al menos 32 caracteres. Ese token solo permite subir ficheros (`POST /api/files`): no da acceso a la web, ni a listar, descargar o borrar.
+2. Crea `~/.transfer-connector.json`:
+
+   ```json
+   { "url": "https://midominio.com/transfer", "token": "el-mismo-API_TOKEN" }
+   ```
+
+   Si la URL es local, puedes añadir `"autostart": { "jar": "ruta/al/transfer-1.0.0.jar", "workDir": "ruta/de/trabajo" }` para que el conector arranque la app cuando esté parada. Su salida va a `logs/transfer.log` dentro de `workDir`.
+3. Registra el conector:
+
+   ```bash
+   claude mcp add transfer --scope user -- node /ruta/a/connector/transfer-mcp.mjs
+   ```
+
+---
+
 ## Tests
 
 ```bash

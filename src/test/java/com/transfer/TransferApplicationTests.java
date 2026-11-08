@@ -39,9 +39,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "transfer.max-storage-mb=1",
         "transfer.min-free-disk-mb=0",
         "transfer.login.max-attempts=3",
-        "transfer.login.lock-minutes=15"
+        "transfer.login.lock-minutes=15",
+        "transfer.api-token=" + TransferApplicationTests.API_TOKEN
 })
 class TransferApplicationTests {
+
+    static final String API_TOKEN = "token-de-test-con-mas-de-32-caracteres";
 
     @Autowired
     private UserRepository userRepository;
@@ -177,6 +180,45 @@ class TransferApplicationTests {
     @Test
     void anonymousUserIsRedirectedToLogin() throws Exception {
         mvc.perform(get("/")).andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("**/login"));
+    }
+
+    @Test
+    void apiUploadWithValidTokenStoresFile() throws Exception {
+        mvc.perform(multipart("/api/files").file(file("informe.txt", "hola"))
+                        .header("Authorization", "Bearer " + API_TOKEN))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("informe.txt"))
+                .andExpect(jsonPath("$.size").value(4));
+        assertEquals(1, storedFileRepository.count());
+    }
+
+    @Test
+    void apiUploadWithoutValidTokenIsRejected() throws Exception {
+        mvc.perform(multipart("/api/files").file(file("a.txt", "hola")))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(multipart("/api/files").file(file("a.txt", "hola"))
+                        .header("Authorization", "Bearer token-equivocado"))
+                .andExpect(status().isUnauthorized());
+        assertEquals(0, storedFileRepository.count());
+    }
+
+    @Test
+    void apiUploadOverQuotaReturnsInsufficientStorage() throws Exception {
+        byte[] big = new byte[700 * 1024];
+        fileStorageService.store(new MockMultipartFile("file", "a.bin", "application/octet-stream", big));
+
+        mvc.perform(multipart("/api/files")
+                        .file(new MockMultipartFile("file", "b.bin", "application/octet-stream", big))
+                        .header("Authorization", "Bearer " + API_TOKEN))
+                .andExpect(status().isInsufficientStorage())
+                .andExpect(jsonPath("$.error").value(org.hamcrest.Matchers.containsString("No queda espacio")));
+    }
+
+    @Test
+    void apiTokenDoesNotOpenTheWebInterface() throws Exception {
+        mvc.perform(get("/").header("Authorization", "Bearer " + API_TOKEN))
+                .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("**/login"));
     }
 
