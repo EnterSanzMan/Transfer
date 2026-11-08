@@ -10,17 +10,17 @@
     <nav class="navbar">
         <a th:href="@{/}" class="brand">
             <span class="brand-icon">⚡</span>
-            <span>Transfer</span>
+            <span class="brand-name">Transfer</span>
         </a>
         <div class="user-nav">
             <div class="user-badge">
                 <span>👤</span>
-                <span sec:authentication="name">usuario</span>
+                <span class="user-name" sec:authentication="name">usuario</span>
                 <span sec:authorize="hasRole('ADMIN')" class="role-tag admin">admin</span>
             </div>
-            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/users}" class="btn-logout" style="border-color: var(--primary); color: var(--primary);">👥 Usuarios</a>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/users}" class="btn-logout" style="border-color: var(--primary); color: var(--primary);" aria-label="Usuarios" title="Usuarios">👥<span class="nav-label">&nbsp;Usuarios</span></a>
             <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit" class="btn-logout">Cerrar sesión</button>
+                <button type="submit" class="btn-logout"><span class="nav-label">Cerrar sesión</span><span class="nav-label-short">Salir</span></button>
             </form>
         </div>
     </nav>
@@ -95,7 +95,7 @@
                                         <span class="badge-size" th:text="${file.formattedSize}">1.2 MB</span>
                                     </td>
                                     <td>
-                                        <div class="action-buttons">
+                                        <div class="action-buttons file-actions">
                                             <!-- Botón 1: Descargar -->
                                             <a th:href="@{/files/{id}/download(id=${file.id})}"
                                                class="btn btn-primary" title="Descargar fichero conservándolo en el servidor">
@@ -138,8 +138,14 @@
                         <div class="dropzone" id="dropzone">
                             <input type="file" name="file" id="fileInput" class="file-input" required>
                             <div class="dropzone-icon">☁️</div>
-                            <h3>Arrastra y suelta tu fichero aquí</h3>
-                            <p>o haz clic para seleccionar un fichero de tu equipo</p>
+                            <h3>
+                                <span class="text-pointer">Arrastra y suelta tu fichero aquí</span>
+                                <span class="text-touch">Elige el fichero que quieres subir</span>
+                            </h3>
+                            <p>
+                                <span class="text-pointer">o haz clic para seleccionar un fichero de tu equipo</span>
+                                <span class="text-touch">Toca aquí para seleccionarlo de tu dispositivo</span>
+                            </p>
                             <button type="button" class="btn btn-primary" style="pointer-events: none;">Explorar archivos</button>
                         </div>
 

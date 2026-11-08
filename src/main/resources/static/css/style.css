@@ -31,8 +31,11 @@ body {
     background-color: var(--bg-page);
     color: var(--text-main);
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 /* Navbar */
@@ -124,6 +127,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    overflow-wrap: anywhere;
 }
 
 .alert-success {
@@ -445,7 +449,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
     color: var(--text-main);
+}
+
+.selected-file-details > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.selected-file-details > span {
+    flex-shrink: 0;
 }
 
 .upload-actions {
@@ -515,6 +529,7 @@ body {
 .login-body {
     background: linear-gradient(135deg, #0d0f14 0%, #171b26 50%, #111520 100%);
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -686,4 +701,290 @@ footer {
 .btn-sm {
     padding: 0.35rem 0.6rem;
     font-size: 0.8rem;
+}
+
+.role-form,
+.password-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.password-input {
+    width: 130px;
+}
+
+/* Textos alternativos: por defecto se muestra la versión de escritorio */
+.text-touch,
+.nav-label-short {
+    display: none;
+}
+
+/* Móviles y pantallas táctiles: controles cómodos de pulsar.
+   Con 16px en los campos, iOS no hace zoom al enfocarlos. */
+@media (max-width: 760px), (pointer: coarse) {
+    .text-pointer {
+        display: none;
+    }
+
+    .text-touch {
+        display: inline;
+    }
+
+    .btn,
+    .btn-logout {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+    }
+
+    .btn-danger-outline,
+    .btn-sm {
+        min-width: 44px;
+    }
+
+    .form-control,
+    .form-control-sm,
+    .search-input {
+        min-height: 44px;
+        font-size: 16px;
+    }
+}
+
+/* Maquetación para móvil */
+@media (max-width: 760px) {
+    /* Barra superior en una sola fila */
+    .navbar {
+        padding: 0.5rem 0.75rem;
+        gap: 0.75rem;
+    }
+
+    .brand {
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+
+    .user-nav {
+        min-width: 0;
+        gap: 0.4rem;
+    }
+
+    .user-nav form {
+        flex-shrink: 0;
+    }
+
+    .user-badge {
+        min-width: 0;
+        padding: 0.35rem 0.6rem;
+    }
+
+    .user-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .user-badge .role-tag,
+    .nav-label {
+        display: none;
+    }
+
+    .nav-label-short {
+        display: inline;
+    }
+
+    .btn-logout {
+        flex-shrink: 0;
+        min-width: 44px;
+        padding: 0.4rem 0.7rem;
+        white-space: nowrap;
+    }
+
+    /* Contenedores */
+    .container {
+        margin: 0.75rem auto;
+        padding: 0 0.75rem;
+    }
+
+    .tab-content {
+        padding: 1rem;
+    }
+
+    .tab-btn {
+        min-height: 48px;
+        padding: 0.75rem 0.5rem;
+        font-size: 0.95rem;
+        white-space: nowrap;
+    }
+
+    .toolbar {
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .search-input {
+        flex-basis: 100%;
+        min-width: 0;
+    }
+
+    /* Las tablas pasan a ser una lista de tarjetas */
+    .files-table,
+    .files-table tbody {
+        display: block;
+    }
+
+    .files-table thead {
+        display: none;
+    }
+
+    .files-table tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.9rem;
+        margin-bottom: 0.75rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+    }
+
+    .files-table tr:last-child {
+        margin-bottom: 0;
+    }
+
+    .files-table td {
+        display: block;
+        min-width: 0;
+        padding: 0;
+        border-bottom: none;
+        font-size: 0.875rem;
+    }
+
+    .files-table tr:hover td {
+        background: transparent;
+    }
+
+    .files-table td:first-child,
+    .files-table td:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .file-name-cell {
+        word-break: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .badge-size {
+        background: var(--bg-card);
+    }
+
+    /* Descargar ocupa toda la fila; debajo, descargar y borrar + papelera */
+    .file-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.5rem;
+    }
+
+    .file-actions > a {
+        grid-column: 1 / -1;
+    }
+
+    .file-actions .btn {
+        width: 100%;
+    }
+
+    /* Usuarios: nombre y rol arriba, cambio de clave y borrado debajo */
+    .users-table td:first-child {
+        grid-column: auto;
+    }
+
+    .users-table .form-control-sm {
+        width: auto;
+    }
+
+    .users-table .action-buttons {
+        flex-wrap: nowrap;
+    }
+
+    .users-table .password-form {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .users-table .password-input {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Subida */
+    .dropzone {
+        padding: 2rem 1rem;
+    }
+
+    .upload-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .upload-progress-container {
+        flex: none;
+        min-width: 0;
+        max-width: none;
+    }
+
+    .notice-box {
+        margin-top: 1.25rem;
+    }
+
+    /* Formularios */
+    .admin-card {
+        padding: 1rem;
+    }
+
+    .admin-card .form-row {
+        gap: 0;
+    }
+
+    .admin-card .form-group {
+        flex-basis: 100%;
+    }
+
+    .admin-card .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .admin-card .btn {
+        width: 100%;
+    }
+
+    /* Login */
+    .login-body {
+        padding: 1rem;
+    }
+
+    .login-card {
+        padding: 1.75rem 1.25rem;
+    }
+
+    footer {
+        padding: 1rem;
+    }
+}
+
+/* Móviles muy estrechos */
+@media (max-width: 360px) {
+    .brand-name {
+        display: none;
+    }
+
+    .tab-btn {
+        gap: 0.3rem;
+        padding: 0.75rem 0.25rem;
+        font-size: 0.875rem;
+    }
 }

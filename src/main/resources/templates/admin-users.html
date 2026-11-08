@@ -10,17 +10,17 @@
     <nav class="navbar">
         <a th:href="@{/}" class="brand">
             <span class="brand-icon">⚡</span>
-            <span>Transfer</span>
+            <span class="brand-name">Transfer</span>
         </a>
         <div class="user-nav">
             <div class="user-badge">
                 <span>👤</span>
-                <span sec:authentication="name">usuario</span>
+                <span class="user-name" sec:authentication="name">usuario</span>
                 <span class="role-tag admin">admin</span>
             </div>
-            <a th:href="@{/}" class="btn-logout">← Volver</a>
+            <a th:href="@{/}" class="btn-logout" aria-label="Volver" title="Volver">←<span class="nav-label">&nbsp;Volver</span></a>
             <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit" class="btn-logout">Cerrar sesión</button>
+                <button type="submit" class="btn-logout"><span class="nav-label">Cerrar sesión</span><span class="nav-label-short">Salir</span></button>
             </form>
         </div>
     </nav>
@@ -73,7 +73,7 @@
 
                 <!-- Tabla de usuarios -->
                 <div class="table-responsive">
-                    <table class="files-table">
+                    <table class="files-table users-table">
                         <thead>
                             <tr>
                                 <th>Usuario</th>
@@ -90,7 +90,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                                    <form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post" class="role-form">
                                         <select name="role" class="form-control form-control-sm"
                                                 onchange="this.form.submit()">
                                             <option value="ROLE_USER"  th:selected="${user.role == 'ROLE_USER'}">Usuario</option>
@@ -102,9 +102,9 @@
                                     <div class="action-buttons">
                                         <!-- Cambiar contraseña -->
                                         <form th:action="@{/admin/users/{id}/password(id=${user.id})}" method="post"
-                                              style="display: inline-flex; align-items: center; gap: 0.4rem;">
-                                            <input type="password" name="newPassword" class="form-control form-control-sm"
-                                                   placeholder="nueva clave" required style="width: 130px;">
+                                              class="password-form">
+                                            <input type="password" name="newPassword" class="form-control form-control-sm password-input"
+                                                   placeholder="nueva clave" required>
                                             <button type="submit" class="btn btn-primary btn-sm" title="Guardar nueva contraseña">🔑</button>
                                         </form>
 
